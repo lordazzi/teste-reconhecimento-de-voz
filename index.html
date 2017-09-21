@@ -1,0 +1,64 @@
+<script type="text/javascript">
+    window.onload = function () {
+        window.SpeechRecognition = window.SpeechRecognition ||
+            window.webkitSpeechRecognition ||
+            null;
+
+        //caso não suporte esta API DE VOZ            
+        if (window.SpeechRecognition === null) {
+            document.getElementById('unsupported').classList.remove('hidden');
+        } else {
+            //......
+            var recognizer = new window.SpeechRecognition();
+            var transcription = document.getElementById("transcription");
+
+            //Para o reconhecedor de voz, não parar de ouvir, mesmo que tenha pausas no usuario
+            recognizer.continuous = true;
+            recognizer.onresult = function (event) {
+                transcription.textContent = "";
+                for (var i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        debugger;
+                        transcription.textContent = event.results[i][0].transcript + ' (Taxa de acerto [0/1] : ' + event.results[i][0].confidence + ')';
+                    } else {
+                        transcription.textContent += event.results[i][0].transcript;
+                    }
+                }
+            }
+
+            recognizer.onspeechstart = function () {
+                console.info('vc ta falando né');
+            }
+
+            recognizer.onspeechend = function () {
+                console.info('falou então');
+            }
+
+            recognizer.onerror = function (e) {
+                console.error('nao funciona');
+                console.log(e);
+            }
+
+            recognizer.onnomatch = function () {
+                console.error('n entendi oq vc falo');
+            }
+
+            document.querySelector("#rect").addEventListener("click", function () {
+                try {
+                    recognizer.start();
+                } catch (ex) {
+                    alert("error: " + ex.message);
+                }
+            });
+        }
+    }
+
+</script>
+
+<p id="ola">Olá tableless, você falou:</p>
+
+<div id="transcription"></div>
+
+<button id="rect">Gravar</button>
+
+<span id="unsupported" class="hidden">API not supported</span>
